@@ -56,8 +56,6 @@ module.exports = {
     baseURL: `https://api.quwi.com/v2/`,
   },
 
-  ssr: false,
-
   /*
   ** Build configuration
   */

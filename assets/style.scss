@@ -63,11 +63,16 @@ input {
 }
 
 .form-group {
-  display: flex;
-  align-items: center;
+  display: block;
   margin-bottom: 20px;
 }
 
 input {
   align-self: center;
+}
+
+.error-container {
+  text-align: center;
+  margin: 20px auto;
+  color: red;
 }

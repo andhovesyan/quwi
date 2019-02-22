@@ -1,7 +1,10 @@
 <template>
   <section id="content" class="content">
     <top-bar>projects</top-bar>
-    <div class="projects-list">
+    <div class="error-container" v-if="error">
+      {{error}}
+    </div>
+    <div v-else class="projects-list">
       <project-box
         v-for="project in projects"
         :key="project.id"
@@ -28,15 +31,17 @@ export default {
     ProjectBox,
     TopBar,
   },
-  data () {
-    return {};
-  },
-  mounted() {
-    this.fetchProjects();
+  async fetch({ store }) {
+    try {
+      await store.dispatch('projects/fetchItems');
+    } catch (e) {
+      console.error(e);
+    }
   },
   computed: {
     ...mapGetters({
       projects: 'projects/all',
+      error: 'projects/fetchError',
     }),
   },
   methods: {
@@ -44,7 +49,6 @@ export default {
       fetchProjects: 'projects/fetchItems',
     }),
     redirectToProject({ id }) {
-      console.log(id);
       this.$router.push(`/projects/${id}`)
     },
   },

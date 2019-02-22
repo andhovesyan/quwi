@@ -3,7 +3,10 @@
     <top-bar>
       <nuxt-link class="btn btn-secondary btn-back" to="/projects">Back</nuxt-link>
     </top-bar>
-    <div class="container">
+    <div class="error-container" v-if="error">
+      {{error}}
+    </div>
+    <div v-else class="container">
       <form v-if="project" class="form-block" method="post" @submit.prevent="submit">
         <fieldset class="logo-container">
           <img v-if="project.logo_url" class="logo-img" :src="project.logo_url" />
@@ -50,6 +53,21 @@ export default {
     CheckboxSwitcher,
     LogoPlaceholder,
   },
+  async asyncData({ store, params }) {
+    try {
+      const project = await store.dispatch('projects/fetchCurrentItem', params.id);
+      return {
+        formData: {
+          name: project.name,
+          is_active: project.is_active,
+          is_owner_watched: project.is_owner_watched,
+        },
+      };
+    } catch (e) {
+      console.error(e);
+      return {};
+    }
+  },
   data () {
     return {
       formData: {
@@ -64,12 +82,15 @@ export default {
     };
   },
   mounted() {
-    this.fetchCurrentProject(this.$route.params.id)
-      .then(this.setFormData);
+    if (!this.project) {
+      this.fetchCurrentProject(this.$route.params.id)
+        .then(this.setFormData);
+    }
   },
   computed: {
     ...mapGetters({
       project: 'projects/current',
+      error: 'projects/fetchCurrentError',
     }),
   },
   methods: {
@@ -98,7 +119,7 @@ export default {
         .catch((err) => {
           this.alert = {
             type: 'error',
-            message: Object.values(err.response.first_errors)[0],
+            message: Object.values(err.response.data.first_errors)[0],
           };
         });
     },
@@ -141,12 +162,11 @@ export default {
   }
 
   .form-label {
-    display: inline-flex;
     min-width: 100px;
+    display: inline-block;
   }
 
   .custom-input {
-    width: 100%;
     padding: 9px;
     box-shadow: none;
     border: 1px solid #ccc;
@@ -154,6 +174,8 @@ export default {
     border-radius: 2px;
     height: 34px;
     margin-right: 6px;
+    display: inline-block;
+    width: calc(100% - 175px);
 
     &::placeholder {
       color: #bbb;
